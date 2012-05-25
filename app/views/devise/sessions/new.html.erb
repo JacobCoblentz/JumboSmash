@@ -1,0 +1,26 @@
+<div id='landing' title='Sign In'>
+	<%= form_for(resource, :as => resource_name, :url => session_path(resource_name), :html => {:class => 'form-horizontal'}) do |f| %>
+  <br />
+	<div class="control-group">
+	  <%= f.label :email, :class => 'control-label' %>
+		<div class="controls">
+	  	<%= f.email_field :email, :class => 'input-xlarge' %>
+		</div>
+	</div>
+
+	<div class="control-group">
+	  <%= f.label :password, :class => 'control-label' %>
+		<div class="controls">
+	  	<%= f.password_field :password, :class => 'input-xlarge' %>
+		</div>
+	</div>
+
+<div class="control-group">
+	<label class="control-label"></label>
+	<div class="control" style='margin-left: 260px;'><%= f.submit "Sign in", :class => 'btn btn-primary btn-large' %></div>
+</div>
+	<% end %>
+<div class="control-group" style="margin-left: 200px;">
+	<span style="margin:auto;"><a href="/users/sign_up">Sign up</a> | <a href="/users/password/new">Forgot your password?</a></span>
+</div>
+</div>

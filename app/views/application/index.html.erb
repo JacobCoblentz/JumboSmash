@@ -1,0 +1,54 @@
+    <div class="container">
+    
+    <div class="hero-unit">
+    	<div class="pull-left">
+    		<h1 id="jumbotron">
+    		  	<span class="jumbo">JUMBO</span><span class="smash">Smash</span><img alt="Jumboheart" class="heart" src="/assets/jumboheart.png" />
+    		</h1>
+    		<br style="clear: both;" />
+    		<h2 class="slogan">The dating site for not dating.</h2>
+    
+    	</div>
+    
+    	<br style="clear: both;" />
+    	
+    </div>
+    </div>
+    
+    <div class="iphone-image">
+    	<img alt="Iphone" class="iphone" src="/assets/iphone.png" />
+    </div>
+    
+    <div class="browser">
+    	<img alt="Browser" class="browser-image" src="/assets/browser.png" width="800px" />
+    </div>
+    
+    <div class="overlay">
+    	<h2 class="cumming">Coming Spring Fling 2012</h2>
+    	<form class="form-horizontal" id="sign_up">
+    		<h3 class="email_ad">Want to find out when it's live? Give us your email.</h3>
+    		<input type="text" name="email" class="input-xlarge email" id="email" placeholder="you@tufts.edu" />
+    		<input type="button" name="submit" id="register" value="Sign up!" class="btn btn-primary" /><br />
+    		<span id="result"></span>
+    	</form>
+    </div>
+    
+    <script type="text/javascript">
+    
+    	$.ajaxSetup({
+    		beforeSend: function(xhr) {
+    			xhr.setRequestHeader('X-CSRF-Token',
+    			$('meta[name="csrf-token"]').attr('content'));
+    		}
+    	});
+    	$("#register").click(function(e) {
+    		console.log("clicked");
+    		$.ajax({
+    			type: "post",
+    			url: '/teaser',
+    			data: {"email":$("#email").val() },
+    			success: function() { $("#result").css("color", "green"); $("#result").html("Thanks for signing up. We'll let ya know.");},
+    			error: function() { $("#result").css("color", "red"); $("#result").html("Sign up once with your tufts email."); }
+    		});
+    	});
+    </script>

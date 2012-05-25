@@ -1,0 +1,48 @@
+
+<script type="text/javascript">
+function getbig(div) {
+	var rowCount = document.getElementById(div).getElementsByTagName("TR").length;
+	var item = document.getElementById(div);
+	
+	item.style.height = rowCount*60 + "px";
+	item.style.overflow = "visible";
+	item.style.opacity = "1";
+	item.style.visibility = "visible";
+	
+	
+}
+</script>
+
+<h1><span id="jumbo">JUMBO</span><span class="smash">Smash</span><img src="jumboheart.png" /></h1>
+<div id ="landing" title= "Your People" >
+
+ <p>Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, 
+ feugenim ac dui. Donec non enim in turpis pulvinar facilisis. Ut felis. Praesent dapibus,
+ neque id cursus faucibus, tortor neque egestas augue, eu vulputate magna eros eu erat. Aliquam erat volutpat. Nam dui mi
+ , tincidunt quis, accumsan porttitor, facilisis luctus, metus</p>
+<form method="post" action="" style="width: 306px; margin: auto;">
+<span class="mailicon">s</spaN><input id="email" type="text" placeholder="Enter your e-mail address" name="email" size="30" />
+	<input type="submit" class="button" name="submit" value="Submit">
+</form>
+<h2 class="header smash" onclick="javascript:getbig('friends')">See your matches!</h2>
+<table id="friends" border="1">
+<tr class="green">
+	<td>Julie Balls</td><td>gsgsfhdfh</td>
+</tr>
+<tr>
+	<td>Annie McQuade</td><td>gsgsfhdfh</td>
+</tr>
+<tr class="green">
+	<td>Michael J Fox</td><td>gsgsfhdfh</td>
+</tr>
+<tr>
+	<td>Steve Buscemi</td><td>gsgsfhdfh</td>
+</tr>
+<tr class="green">
+	<td>Dan Rather</td><td>gsgsfhdfh</td>
+</tr>
+<tr>
+	<td>Salman Rushdie</td><td>gsgsfhdfh</td>
+</tr>
+</table>
+</div>

@@ -1,0 +1,15 @@
+#landing{:title => 'Your People'}
+  %table#friends
+    - @connections.each do |friend|
+      %tr.green
+        %td= friend.name
+
+    - @requests.each do |friend|
+      %tr
+        %td= friend.name
+
+  .row
+    .span4
+      %form.form-search
+        %input.input-medium.search-query(type='text' data-provide='typeahead' placeholder='name' style='width:300px; margin: 20px auto; margin-left: 140px;')
+

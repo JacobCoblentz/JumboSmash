@@ -1,0 +1,440 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html> 
+	<head> 
+  
+  <link rel = "stylesheet" media="screen" href="jumbosmash.css" />
+	<title>Log In</title> 
+	
+	<meta name="viewport" content="width=device-width, initial-scale=1"> 
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+  
+	<link rel="stylesheet" href="http://code.jquery.com/mobile/1.1.0/jquery.mobile-1.1.0.min.css" />
+	<script src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
+	<script src="http://code.jquery.com/mobile/1.1.0/jquery.mobile-1.1.0.min.js"></script>
+  <script src="typeahead.js"></script>
+  <script type="text/javascript">
+  
+    $(document).ready(function(){ /*On Load Functionality*/
+      GetMap();
+      curLat = null;
+      curLong=null;
+      connections = null;
+      availableTags = null;
+      
+      $("#add").typeahead({
+        source: function(callback){
+          $.ajax({
+            type: "get",
+            dataType: "json",
+            url: "/people_search?q=" + $("#add").val(),
+            success: function(data){
+              callback(data)
+            },
+            failure: function(data){
+              console.log("No Tags Found");
+              return null;
+            }
+          });
+        },
+        valueField: 'userid',
+        labelField: 'name'
+      });
+      
+      
+      $("#connectionButton").click(function(){
+        $("#connectionList").empty();
+        if(navigator.geolocation){
+          navigator.geolocation.getCurrentPosition(function(position){
+            curLat = position.coords.latitude;
+            curLong = position.coords.longitude;
+          });
+        }
+        
+        $.ajax({
+          type: "get",
+          dataType: "json",
+          url: "/checkins.json?auth_token="+localStorage["token"],
+          success: function(data) {
+            connections = data["checkins"];
+            if (data["checkins"].length == 0)
+            {
+              $('#connectionList').append('<li><a id="listItem">No Connections</a></li>');     
+            }
+            else
+            {
+              for(var i=0; i < data["checkins"].length; i++)
+              {
+                addConnection(data["checkins"][i]);
+              }
+            }
+            $('#connectionList').listview('refresh');
+          },
+          error: function(err) {
+            console.log("Get Checkins Failed.");
+          }
+        });
+        
+      });
+     
+      $("#loginButton").click(function(){
+        console.log("Logging in");
+        $.ajax({
+          type: 'POST',
+          url: "/api/tokens.json",
+          dataType: "json",
+          data: { "email": $("#emailBox").val(), "password": $("#passBox").val() },
+          success: function(data){
+            window.dat = data;
+            // var response = JSON.parse(data);
+            console.log(data["token"]);
+            localStorage.setItem("token", data["token"]);
+            localStorage.setItem("key", data["key"]);
+            document.getElementById("loginError").innerHTML = "";
+            $.mobile.changePage("#welcome");
+            
+          },
+          error: function(data){
+            console.log("Login Failed");
+            document.getElementById("loginError").innerHTML = "Failed Login";
+            $.mobile.changePage("#login"); //TODO: Remove
+            
+          }
+         
+        });
+    
+        //make call to proper log in service here
+        //alert("logging in");
+      
+      });
+      
+      $("#addConnectionButton").click(function(){
+        $.ajax({
+          type: 'POST',
+          url: "/send_request",
+          dataType: "json",
+          data: { 
+             "token": localStorage["token"], 
+             "id": $("#add").val()
+          },
+          success: function(data){
+            $("#addResult").html("Success!");
+            $("#addResult").css("color", "green");
+          },
+          error: function(data){
+            $("#addResult").html("Failure! Try Again.");
+            $("#addResult").css("color", "red");
+          }
+         
+        });
+      });
+      
+      $("#loadPinButton").click(function(){
+        if (myLocation== null)
+        {
+          if(navigator.geolocation){
+            console.log("Geolocation working");
+            navigator.geolocation.getCurrentPosition(function(position){
+              console.log(position.coords.latitude + " " + position.coords.longitude);
+              myLocation = new Microsoft.Maps.Location(position.coords.latitude,position.coords.longitude);
+              myPin = new Microsoft.Maps.Pushpin(myLocation, {draggable: false});
+              myPinInfoBox = new Microsoft.Maps.Infobox(myPin.getLocation(),
+                { title: 'Me',
+                  visible: false,
+                  offset: new Microsoft.Maps.Point(0,15),
+                  height:30,
+                  width:60});
+              Microsoft.Maps.Events.addHandler(myPin, 'click', function(){myPinInfoBox.setOptions({visible:true})});
+              Microsoft.Maps.Events.addHandler(myPin, 'viewchange', function(){myPinInfoBox.setOptions({visible: false})});
+              
+              map.entities.push(myPin);
+              map.entities.push(myPinInfoBox);
+              map.setView({center: myLocation});
+              console.log("Pin Pushed");
+              
+            });
+          }
+          else
+          {
+            console.log("Geolocation not working");
+          }
+
+          $.ajax({
+            type: "get",
+            dataType: "json",
+            url: "/checkins.json?auth_token="+localStorage["token"],
+            success: function(data) {
+              for (var i=0; i<data["checkins"].length; i++) {
+                addMarker(data["checkins"][i]);
+              }
+            },
+            error: function(err) {
+              alert("Get Checkins Failed");
+            }
+          });
+        }
+      });
+    
+      $("#checkinButton").click(function(){
+        //window.location.hash = "#map";
+        //POST REQUEST HERE
+        $.ajax({
+          type: 'POST',
+          url: "/checkins.json?auth_token="+localStorage["token"],
+          dataType: "json",
+          data: { 
+            "checkin[description]": $("#statusInput").val(), 
+            "checkin[location]": $("#locationInput").val(),
+            "checkin[latitude]": curLat,
+            "checkin[longitude]": curLong
+            },
+          success: function(data){
+            console.log("Updated Status successfully");
+          },
+          error: function(data){
+            console.log(data);
+          }
+         
+        });
+        window.location.hash = "#map";
+      }); 
+    
+     });
+    function displayStatus(li){
+      console.log("Register click for item " + li.innerHTML);
+      
+      for (var i=0; i< connections.length; i++) {
+              console.log(connections[i][0]);
+              if (connections[i][0] == li.innerHTML)
+              {
+                console.log("found connection for " + li.innerHTML);
+                  $('#nameBlock').html(li.innerHTML); 
+                  $('statusBlock').html(connections[i][1]["description"]);
+                  $('locationBlock').html(connections[i][1]["location"]); 
+                  $('timeBlock').html(connections[i][1]["lastCheckin"]);
+                  if (connections[i][1]["latitude"] != null)
+                  {
+                    $('locationButton').css("visibility", "visible");
+                  }
+                  else
+                  {
+                    $('locationButton').css("visibility", "hidden");
+                  }
+                  $('#statusDisplay').css("visibility", "visible");
+              }
+            }
+      
+    };
+    
+    function addConnection(obj){
+      $('#connectionList').append('<li><a id="listItem" onclick="displayStatus(this)">'+obj[0]+'</a></li>');
+    }
+
+    function getbig(div) {
+      var rowCount = document.getElementById(div).getElementsByTagName("TR").length;
+      var item = document.getElementById(div);
+      
+      item.style.height = rowCount*60 + "px";
+      item.style.overflow = "visible";
+      item.style.opacity = "1";
+      item.style.visibility = "visible";
+    };
+    
+		function addMarker(obj) {
+			map = window.map;
+			var loc = new Microsoft.Maps.Location(obj["latitude"], obj["longitude"]);
+      var pin = new Microsoft.Maps.Pushpin(loc, {draggable: false});
+      var infobox = new Microsoft.Maps.Infobox(pin.getLocation(),
+        { title: 'Smushable Jumbo',
+          visible: false,
+          offset: new Microsoft.Maps.Point(0,15),
+          height:40,
+          width:200});
+      Microsoft.Maps.Events.addHandler(pin, 'click', function(){infobox.setOptions({visible:true})});
+      Microsoft.Maps.Events.addHandler(pin, 'viewchange', function(){infobox.setOptions({visible: false})});
+      console.log("Added pin "+obj["description"]);
+      map.entities.push(pin);
+      map.entities.push(infobox);
+		};
+    
+    function GetMap(){ 
+      window.map = new Microsoft.Maps.Map(document.getElementById("mapDiv"), {enableSearchLogo: false, showDashboard: false, showMapTypeSelector: false, showScalebar: false, center: new Microsoft.Maps.Location(42.406,-71.116),credentials:"AubgdGoMosi08yMPZ6dA77g1P9S0_3Y019-wjx5A7ERj3K2r-V6J8XQ9EckVbvKC", height: 300, width: 300, mapTypeId: Microsoft.Maps.MapTypeId.road});
+      var zoomLevel =15;
+      myLocation = null;
+      var options = map.getOptions();
+      options.zoom =zoomLevel;
+      map.setView(options);
+      
+    };
+    
+    
+  </script>
+  <script charset="UTF-8" type="text/javascript" src="http://ecn.dev.virtualearth.net/mapcontrol/mapcontrol.ashx?v=7.0">  
+  </script>
+</head> 
+<body> 
+
+<div data-role="page" id="login">
+
+	<div data-role="header">
+		<h1>Log In</h1>
+	</div><!-- /header -->
+
+	<div data-role="content">	
+  <h2 align="center">
+    <span id="jumbo">JUMBO</span><br />
+    <span class="smash">Smash</span><br />
+    <img src="jumboheart.png" />
+  </h2>
+
+    <form name="loginForm" action="#welcome" onsubmit="login(this)" method="get">
+    Email: <br />
+    <input type="text" name ="email" id="emailBox"/><br />
+    Password: <br />
+    <input type="password" name="passwd" id="passBox"/>
+    </form>
+    <a data-role="button" id="loginButton"> Log In.</a>
+    <a id="loginError" style="color:red"></a>
+    
+	</div><!-- /content -->
+
+	<div data-role="footer">
+		<h4>Tufts SMASH (2012)</h4>
+	</div><!-- /footer -->
+</div><!-- /page -->
+
+
+<div data-role="page" id="addPage">
+	<div data-role="header">
+		<h1>Add New Connections</h1>
+	</div><!-- /header -->
+
+	<div data-role="content">	
+    <h2 align="center">
+      <span id="jumbo">Make</span><br />
+      <span class="smash">Connections</span><br />
+      <img src="jumboheart.png" />
+    </h2>
+    
+    <label>Name: </label><br>
+    <input id="add" type="text" data-provide="typeahead">
+    <a data-role="button" id="addConnectionButton">Submit Button</a>
+    <br>
+    <a id="addResult"></a>
+    <a href="#welcome" data-role="button" data-mini="true"> Go Back </a>
+  </div>
+</div>
+
+
+	<div data-role="footer">
+		<h4>Tufts SMASH (2012)</h4>
+	</div><!-- /footer -->
+</div>
+
+
+
+<div data-role="page" id="welcome">
+
+	<div data-role="header">
+		<h1>Welcome</h1>
+	</div><!-- /header -->
+
+	<div data-role="content">		
+  <h2 align="center">
+    <span id="jumbo">JUMBO</span><br />
+    <span class="smash">Smash</span><br />
+    <img src="jumboheart.png" />
+  </h2>
+
+    <a href="#map" data-role="button" id="loadPinButton">My Smush Map</a>
+    <a href="#checkin" data-role="button">Check-In</a>
+    <a href="#connections" data-role="button" id="connectionButton">My Connections</a>
+    
+	</div><!-- /content -->
+
+	<div data-role="footer">
+		<h4>Tufts SMASH (2012)</h4>
+	</div><!-- /footer -->
+</div><!-- /page -->
+
+<div data-role="page" id="map">
+
+	<div data-role="header">
+		<h1 style="left: -35px; width: 200px;"><span id="jumbo">My</span><br /><span class="smash">Smush Map</span></h1>
+	</div><!-- /header -->
+
+	<div data-role="content">	
+		<p align="center">
+      <div id="mapDiv" class="map" style="left: -7px;"></div>
+      <a data-role="button" id="loadPinButton"> Load Connections</a>
+      <a href="#welcome" data-role="button" data-mini="true"> Go Back. </a>
+    </p>		
+	</div><!-- /content -->
+	<div data-role="footer">
+		<h4>Tufts SMASH (2012)</h4>
+	</div><!-- /footer -->
+
+</div><!-- /page -->
+
+<div data-role="page" id="checkin">
+	<div data-role="header">
+    <h1>Check In</h1>
+	</div><!-- /header -->
+
+  <div data-role="content">
+  <h2 align="center">
+    <span id="jumbo">Lets Get</span><br />
+    <span id="jumbo">You Some</span><br />
+    <span class="smash">BOOTY</span><br />
+  </h2>
+    
+    <form name="checkinForm" action="#map" onsubmit="checkin(this)">
+    Status: <br />
+    <input type="text" name ="desc" id="statusInput"/><br />
+    Location: <br />
+    <input type="text" name="Location" id="locationInput" />
+    </form>
+    <a href="#connections" type="submit"id="checkinButton"> So DTF Right Now! </a>
+    <h1><img src="jumboheart.png" /></h1>
+    <a href="#welcome" data-role="button" data-mini="true"> Go Back. </a>
+  </div>
+  
+	<div data-role="footer">
+		<h4>Tufts SMASH (2012)</h4>
+	</div><!-- /footer -->
+</div>
+
+<div data-role="page" id="connections">
+	<div data-role="header">
+    <!--<h1><span id="jumbo">My </span><span class="smash">Connections</span></h1>-->
+    <h1> My Connections</h1>
+	</div><!-- /header -->
+
+  <div data-role="content">
+  
+  <h2 align="center">
+    <span id="jumbo">Smash</span><br />
+    <span class="smash">Connections</span><br />
+    <img src="jumboheart.png" />
+  </h2>
+      <ul data-role="listview" data-theme="c" data-inset="true" id="connectionList">
+       <!-- <li><a id="listItem" onclick="displayStatus(this)">Julie Balls (TEST)</a></li> -->
+      </ul>
+      <div id="statusDisplay" style="border: 5px ridge #d22f2f; padding:3px; border-radius:10px; visibility:hidden;"> 
+        <a style="color:black;">Name:</a> <a style="color:black;" id="nameBlock"></a><br>
+        <a style="color:black;">Status:</a> <a style="color:black;" id="statusBlock"></a><br>
+        <a style="color:black;">Location:</a> <a style="color:black;" id="locationBlock"></a><br>
+        <a style="color:black;">Time:</a> <a style="color:black;" id="timeBlock"></a><br>
+        <a href="#welcome" data-role="button" data-mini="true" id="locationButton"> Go To Location. </a>
+      </div>
+    
+    <a href="#welcome" data-role="button" data-mini="true"> Go Back. </a>
+    <a data-role="button" onclick="testAdd()" data-mini="true"> Load Connections</a>
+  
+  </div>
+  
+	<div data-role="footer">
+		<h4>Tufts SMASH (2012)</h4>
+	</div><!-- /footer -->
+<div>
+</body>
+</html>

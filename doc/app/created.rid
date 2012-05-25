@@ -1,0 +1,21 @@
+Fri, 25 May 2012 13:26:36 -0400
+doc/README_FOR_APP	Fri, 25 May 2012 13:13:11 -0400
+app/controllers/admin_controller.rb	Fri, 25 May 2012 13:13:11 -0400
+app/controllers/API/tokens_controller.rb	Fri, 25 May 2012 13:13:11 -0400
+app/controllers/application_controller.rb	Fri, 25 May 2012 13:13:11 -0400
+app/controllers/checkins_controller.rb	Fri, 25 May 2012 13:13:11 -0400
+app/controllers/dashboard_controller.rb	Fri, 25 May 2012 13:13:11 -0400
+app/controllers/friendships_controller.rb	Fri, 25 May 2012 13:13:11 -0400
+app/controllers/sessions_controller.rb	Fri, 25 May 2012 13:13:11 -0400
+app/controllers/teaser_controller.rb	Fri, 25 May 2012 13:13:11 -0400
+app/helpers/application_helper.rb	Fri, 25 May 2012 13:13:11 -0400
+app/helpers/dashboard_helper.rb	Fri, 25 May 2012 13:13:11 -0400
+app/helpers/friendship_helper.rb	Fri, 25 May 2012 13:13:11 -0400
+app/mailers/match_maker.rb	Fri, 25 May 2012 13:13:11 -0400
+app/models/checkin.rb	Fri, 25 May 2012 13:13:11 -0400
+app/models/connection_queue.rb	Fri, 25 May 2012 13:13:11 -0400
+app/models/encrypted_list.rb	Fri, 25 May 2012 13:13:11 -0400
+app/models/friendship.rb	Fri, 25 May 2012 13:13:11 -0400
+app/models/teaser.rb	Fri, 25 May 2012 13:13:11 -0400
+app/models/user.rb	Fri, 25 May 2012 13:13:11 -0400
+app/models/whitelist.rb	Fri, 25 May 2012 13:13:11 -0400
