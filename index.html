@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="viewport" content="width=640" />
+
+    <link rel="stylesheet" href="stylesheets/core.css" media="screen"/>
+    <link rel="stylesheet" href="stylesheets/mobile.css" media="handheld, only screen and (max-device-width:640px)"/>
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css"/>
+
+    <script type="text/javascript" src="javascripts/modernizr.js"></script>
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="javascripts/headsmart.min.js"></script>
+    <script type="text/javascript">
+      $(document).ready(function () {
+        $('#main_content').headsmart()
+      })
+    </script>
+    <title>Jumbosmash by erikformella</title>
+  </head>
+
+  <body>
+    <a id="forkme_banner" href="https://github.com/erikformella/JumboSmash">View on GitHub</a>
+    <div class="shell">
+
+      <header>
+        <span class="ribbon-outer">
+          <span class="ribbon-inner">
+            <h1>Jumbosmash</h1>
+            <h2>Meet people who you like who like you who go to school with you too.</h2>
+          </span>
+          <span class="left-tail"></span>
+          <span class="right-tail"></span>
+        </span>
+      </header>
+
+      <section id="downloads">
+        <span class="inner">
+          <a href="https://github.com/erikformella/JumboSmash/zipball/master" class="zip"><em>download</em> .ZIP</a><a href="https://github.com/erikformella/JumboSmash/tarball/master" class="tgz"><em>download</em> .TGZ</a>
+        </span>
+      </section>
+
+
+      <span class="banner-fix"></span>
+
+
+      <section id="main_content">
+        <h2>This is JumboSmash</h2>
+
+<p>This project was born at Tufts University during a 24 hour hackathon from the genius of <a href="https://github.com/andrewpurcell">Andrew Purcell</a>, <a href="https://github.com/chopki01">Calvin Hopkins</a>, Sam Purcell, and <a href="https://github.com/erikformella">Erik Formella</a> (me). It was created to answer the ever torturous question "Does (s)he like me?" The idea is that a user enters a list of people she likes, and if one of those people creates a list with her on it as well, both parties are sent a friendly email. No one can see a user's list.</p>
+
+<p>JumboSmash was built for students at Tufts, originally just seniors since they need it the most with their limited time left. By encrypted all sensitive data with users' passwords, even people with access to the database cannot creep.</p>
+
+<h3>Quickstart</h3>
+
+<p>If you would like to run this website yourself, you can do so for free on <a href="https://devcenter.heroku.com/articles/rails3">Heroku</a>. Keep in mind, it is a work in progress and some features do not work correctly yet (see below).</p>
+
+<div class="highlight"><pre><span class="nv">$ </span>git clone git://github.com/erikformella/JumboSmash.git
+<span class="nv">$ </span><span class="nb">cd </span>JumboSmash
+<span class="nv">$ </span>bundle install
+<span class="nv">$ </span>rake db:migrate
+<span class="nv">$ </span>rake db:seed
+<span class="nv">$ </span>rails s
+</pre></div>
+
+<p>Now you can visit http://localhost:3000 in your web browser and log in as anyone listed in db/people.csv using the password 'testing'.</p>
+
+<h3>Work to be done</h3>
+
+<p>As I mentioned before, there is a lot of work to be done. Mainly:</p>
+
+<ul>
+<li>
+<em>Registration</em> - right now, all accounts must be pre-created</li>
+<li>
+<em>Email</em> - people are not emailed on mutual match, only given an in app indication</li>
+<li>
+<em>Mobile</em> - the mobile app needs to be connected to the API and tested</li>
+<li>On that note, everything needs tests. way more tests</li>
+<li>Also, get link for Sam's github profile for the readme</li>
+</ul>
+      </section>
+
+      <footer>
+        <span class="ribbon-outer">
+          <span class="ribbon-inner">
+            <p>this project by <a href="https://github.com/erikformella">erikformella</a> can be found on <a href="https://github.com/erikformella/JumboSmash">GitHub</a></p>
+          </span>
+          <span class="left-tail"></span>
+          <span class="right-tail"></span>
+        </span>
+        <p>Generated with <a href="http://pages.github.com">GitHub Pages</a> using Merlot</p>
+        <span class="octocat"></span>
+      </footer>
+
+    </div>
+
+    
+  </body>
+</html>
