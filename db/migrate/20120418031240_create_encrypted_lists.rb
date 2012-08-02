@@ -4,8 +4,8 @@ class CreateEncryptedLists < ActiveRecord::Migration
       t.text :matched
       t.text :requests
       t.text :pending
-      t.integer :user_id
 
+      t.integer :user_id
     end
   end
 end

@@ -1,3 +1,5 @@
+require 'eset'
+
 class User < ActiveRecord::Base
   has_many :checkins
   has_one :encrypted_list, :autosave => true, :dependent => :destroy
@@ -24,52 +26,66 @@ class User < ActiveRecord::Base
   end
   
   def get_connections(secret)
-    uids = encrypted_list.read_matched_list secret
-    User.find uids
+    encrypted_list.unlock_sets secret
+    uids = encrypted_list.matched.set
+    self.class.find uids.to_a
   end
 
   def get_requests(secret)
-    uids = encrypted_list.read_requests_list secret
-    User.find uids
+    encrypted_list.unlock_sets secret
+    uids = encrypted_list.requests.set
+    self.class.find uids.to_a
   end
 
   def get_pending(secret)
-    uids = encrypted_list.read_pending_list secret
-    User.find uids
+    encrypted_list.unlock_sets secret
+    uids = encrypted_list.pending.set
+    self.class.find uids.to_a
   end
 
   def resolve_queued_connections(secret)
-    connection_map = {}
+    # results for information about data inconsistencies, not really used yet
+    results = []
+
+    User.transaction do
+      for their_id, connections in connection_map(secret)
+        case connections.last
+        when :create
+          results << encrypted_list.add_pending(their_id, secret)
+        when :destroy
+          results << encrypted_list.remove(their_id, secret)
+        end
+      end
+
+      encrypted_list.save!
+      queued_connections.destroy_all
+    end
+
+    results
+  end
+
+  def connection_map(secret)
+    cmap = {}
     queued_connections.each do |qc|
       their_id = qc.decrypt self.private_key, secret
       their_id = Integer(their_id)
-      if connection_map[their_id].nil?
-        connection_map[their_id] = []
-      end
-      connection_map[their_id].append qc.message_type.to_sym
+      cmap[their_id] ||= []
+      cmap[their_id].append qc.message_type.to_sym
     end
-    queued_connections.destroy_all
 
-    results = []
-    for k,v in connection_map
-      case v.last
-      when :create
-        results.append encrypted_list.add_new_request k, :theirs, secret
-      when :destroy
-        results.append encrypted_list.remove k, secret
-      end
-    end
-    results
+    return cmap
   end
 
   def add_request(their_id, secret)
     them = User.find their_id
-    return 'failed' if String(their_id) == String(self.id) or not them
+    return :failed if String(their_id) == String(self.id) or not them
     resolve_queued_connections(secret)
 
-    status = encrypted_list.add_new_request their_id, :mine, secret
+    status = encrypted_list.add_request their_id, secret
+    return :failed unless save
+
     case status
-    when 'added', 'matched'
+    when :requested, :matched
       send_connection_message their_id, :create
     end
     return status
@@ -115,14 +131,14 @@ class User < ActiveRecord::Base
 
   def create_encrypted_list
     secret = Digest::SHA2.base64digest DA_SALT + password
-    blank_e_list = EncryptedList.encrypt_list [], secret
+    blank_e_list = ESet.new [], secret
 
     self.build_encrypted_list({:matched => blank_e_list, :requests => blank_e_list, :pending => blank_e_list})
   end
 
   def force_create_encrypted_list(pword)
     secret = Digest::SHA2.base64digest DA_SALT + pword
-    blank_e_list = EncryptedList.encrypt_list [], secret
+    blank_e_list = ESet.new [], secret
 
     self.build_encrypted_list({:matched => blank_e_list, :requests => blank_e_list, :pending => blank_e_list})
   end
